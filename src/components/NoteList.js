@@ -1,43 +1,77 @@
-import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
-import axios from "axios";
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+import { Link, useNavigate } from 'react-router-dom';
 
-function NoteList() {
+const NoteList = () => {
   const [notes, setNotes] = useState([]);
+  const navigate = useNavigate();
 
   useEffect(() => {
-    axios.get("http://localhost:8000/api/notes/").then((response) => {
-      setNotes(response.data);
-    });
+    axios
+      .get('http://localhost:8000/api/notes/')
+      .then(res => {
+        setNotes(res.data);
+      })
+      .catch(err => console.log(err));
   }, []);
 
+  const handleDeleteNote = id => {
+    axios
+      .delete(`http://localhost:8000/api/notes/${id}/`)
+      .then(res => {
+        const newNotes = notes.filter(note => note.id !== id);
+        setNotes(newNotes);
+      })
+      .catch(err => console.log(err));
+  };
+
+  const handleCreateNote = () => {
+    navigate('/create');
+  };
+
   return (
-    <div className="container mx-auto py-4">
-      <h1 className="text-2xl font-bold mb-4">Notes</h1>
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-        {notes.map((note) => (
-          <Link
-            to={`/notes/${note.id}`}
+    <div className="flex flex-wrap">
+      {notes.length === 0 ? (
+        <p>No notes found. Please create a new note.</p>
+      ) : (
+        notes.map(note => (
+          <div
             key={note.id}
-            className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg hover:bg-gray-100 transition duration-300"
+            className="w-full md:w-1/2 lg:w-1/3 xl:w-1/4 p-2"
           >
-            <img
-              src={note.cover_image}
-              alt={note.title}
-              className="w-full h-48 object-cover"
-            />
-            <div className="p-4">
-              <h2 className="text-xl font-bold mb-2">{note.title}</h2>
-              <p className="text-gray-600 text-sm mb-4">
-                {new Date(note.updated).toLocaleDateString()}
+            <div className="border rounded shadow p-4 h-full">
+              <Link to={`/notes/${note.id}`}>
+                <img
+                  src={note.cover_image}
+                  alt=""
+                  className="w-full h-32 object-cover"
+                />
+                <h2 className="text-lg font-bold my-2">{note.title}</h2>
+              </Link>
+              <p className="text-gray-500 text-sm my-2">
+                Updated at: {note.updated}
               </p>
-              <p className="text-gray-700 text-base">{note.body}</p>
+              <button
+                onClick={() => handleDeleteNote(note.id)}
+                className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded"
+              >
+                Delete
+              </button>
             </div>
-          </Link>
-        ))}
+          </div>
+        ))
+      )}
+      <div className="w-full md:w-1/2 lg:w-1/3 xl:w-1/4 p-2">
+        <div
+          onClick={handleCreateNote}
+          className="border rounded shadow p-4 h-full cursor-pointer text-center"
+        >
+          <p className="text-3xl text-gray-500">+</p>
+          <p className="text-sm font-bold text-gray-500">Create Note</p>
+        </div>
       </div>
     </div>
   );
-}
+};
 
 export default NoteList;

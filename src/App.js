@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import { NoteList } from "./components/NoteList";
-import { NoteDetail } from "./components/NoteDetail";
-import { NoteForm } from "./components/NoteForm";
+import NoteList from "./components/NoteList";
+import NoteDetail from "./components/NoteDetail";
+import NoteForm from "./components/NoteForm";
 import axios from "axios";
 
 function App() {
