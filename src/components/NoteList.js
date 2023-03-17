@@ -1,77 +1,76 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import axios from 'axios';
-import { Link, useNavigate } from 'react-router-dom';
+import NoteForm from './NoteForm';
 
-const NoteList = () => {
+function NoteList() {
   const [notes, setNotes] = useState([]);
-  const navigate = useNavigate();
+  const [showNoteForm, setShowNoteForm] = useState(false);
 
   useEffect(() => {
-    axios
-      .get('http://localhost:8000/api/notes/')
-      .then(res => {
-        setNotes(res.data);
-      })
-      .catch(err => console.log(err));
+    async function fetchNotes() {
+      const response = await axios.get('http://localhost:8000/api/notes/');
+      setNotes(response.data);
+    }
+    fetchNotes();
   }, []);
 
-  const handleDeleteNote = id => {
-    axios
-      .delete(`http://localhost:8000/api/notes/${id}/`)
-      .then(res => {
-        const newNotes = notes.filter(note => note.id !== id);
-        setNotes(newNotes);
-      })
-      .catch(err => console.log(err));
-  };
-
-  const handleCreateNote = () => {
-    navigate('/create');
+  const handleDelete = async (id) => {
+    try {
+      await axios.delete(`http://localhost:8000/api/notes/${id}/`);
+      setNotes(notes.filter((note) => note.id !== id));
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   return (
-    <div className="flex flex-wrap">
-      {notes.length === 0 ? (
-        <p>No notes found. Please create a new note.</p>
+    <div className="container mx-auto px-4">
+      {showNoteForm ? (
+        <NoteForm setNotes={setNotes} />
       ) : (
-        notes.map(note => (
-          <div
-            key={note.id}
-            className="w-full md:w-1/2 lg:w-1/3 xl:w-1/4 p-2"
-          >
-            <div className="border rounded shadow p-4 h-full">
-              <Link to={`/notes/${note.id}`}>
-                <img
-                  src={note.cover_image}
-                  alt=""
-                  className="w-full h-32 object-cover"
-                />
-                <h2 className="text-lg font-bold my-2">{note.title}</h2>
-              </Link>
-              <p className="text-gray-500 text-sm my-2">
-                Updated at: {note.updated}
-              </p>
-              <button
-                onClick={() => handleDeleteNote(note.id)}
-                className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded"
-              >
-                Delete
-              </button>
-            </div>
+        <div>
+          <div className="flex justify-between items-center my-8">
+            <h1 className="text-3xl font-medium text-gray-900">Notes</h1>
+            <button
+              onClick={() => setShowNoteForm(true)}
+              className="bg-blue-500 text-white font-medium py-2 px-4 rounded hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2"
+            >
+              Create Note
+            </button>
           </div>
-        ))
+          {notes.length > 0 ? (
+            <ul className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {notes.map((note) => (
+                <li key={note.id} className="border border-gray-400 rounded-lg overflow-hidden shadow-md">
+                  <Link to={`/notes/${note.id}/`} className="block">
+                    <img src={note.cover_image} alt="" className="w-full h-40 object-cover" />
+                    <div className="p-4">
+                      <h2 className="text-lg font-medium text-gray-900">{note.title}</h2>
+                      <p className="mt-2 text-gray-600">{note.body.slice(0, 100)}...</p>
+                    </div>
+                  </Link>
+                  <div className="bg-gray-100 px-4 py-3">
+                    <button
+                      className="text-red-500 font-medium hover:text-red-600"
+                      onClick={() => handleDelete(note.id)}
+                    >
+                      Delete
+                    </button>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p>No notes found.</p>
       )}
-      <div className="w-full md:w-1/2 lg:w-1/3 xl:w-1/4 p-2">
-        <div
-          onClick={handleCreateNote}
-          className="border rounded shadow p-4 h-full cursor-pointer text-center"
-        >
-          <p className="text-3xl text-gray-500">+</p>
-          <p className="text-sm font-bold text-gray-500">Create Note</p>
-        </div>
-      </div>
     </div>
+  )}
+</div>
   );
-};
+}
 
 export default NoteList;
+
+
+

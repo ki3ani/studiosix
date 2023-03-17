@@ -1,13 +1,22 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
 
-function NoteForm() {
+function NoteForm({ setNotes }) {
   const navigate = useNavigate();
   const { id } = useParams();
   const [title, setTitle] = useState('');
   const [coverImage, setCoverImage] = useState(null);
   const [body, setBody] = useState('');
+
+  useEffect(() => {
+    if (id) {
+      axios.get(`http://localhost:8000/api/notes/${id}/`).then((response) => {
+        setTitle(response.data.title);
+        setBody(response.data.body);
+      });
+    }
+  }, [id]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -18,16 +27,28 @@ function NoteForm() {
       formData.append('cover_image', coverImage);
     }
     try {
+      let response;
       if (id) {
-        await axios.patch(`http://localhost:8000/api/notes/${id}/`, formData);
+        response = await axios.patch(`http://localhost:8000/api/notes/${id}/`, formData);
+        setNotes((prevNotes) =>
+          prevNotes.map((note) => (note.id === response.data.id ? response.data : note))
+        );
+        alert('Note updated successfully!');
+        navigate(`/notes/${id}`);
       } else {
-        await axios.post('http://localhost:8000/api/notes/', formData);
+        response = await axios.post('http://localhost:8000/api/notes/', formData);
+        setNotes((prevNotes) => [response.data, ...prevNotes]);
+        alert('Note created successfully!');
       }
+      setTitle('');
+      setBody('');
+      setCoverImage(null);
       navigate('/notes');
     } catch (error) {
       console.error(error);
     }
   };
+
 
   return (
     <div className="container mx-auto px-4">
@@ -83,7 +104,10 @@ function NoteForm() {
       </form>
     </div>
   );
+
 }
 
 export default NoteForm;
 
+
+  

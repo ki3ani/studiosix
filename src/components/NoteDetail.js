@@ -1,16 +1,37 @@
 import React, { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
+import NoteForm from "./NoteForm";
 
 function NoteDetail() {
   const { id } = useParams();
   const [note, setNote] = useState(null);
+  const [editing, setEditing] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     axios.get(`http://localhost:8000/api/notes/${id}/`).then((response) => {
       setNote(response.data);
     });
   }, [id]);
+
+  const handleUpdate = async (formData) => {
+    try {
+      const response = await axios.patch(
+        `http://localhost:8000/api/notes/${id}/`,
+        formData
+      );
+      setNote(response.data);
+      setEditing(false);
+      navigate(`/notes/${id}`);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  if (editing) {
+    return <NoteForm note={note} handleSubmit={handleUpdate} />;
+  }
 
   if (!note) {
     return <div>Loading...</div>;
@@ -28,6 +49,12 @@ function NoteDetail() {
       <p className="text-gray-500 text-sm">
         Last updated: {note.updated}
       </p>
+      <button
+        className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mt-4"
+        onClick={() => setEditing(true)}
+      >
+        Edit Note
+      </button>
     </div>
   );
 }
