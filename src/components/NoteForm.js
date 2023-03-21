@@ -34,7 +34,6 @@ function NoteForm({ setNotes }) {
           prevNotes.map((note) => (note.id === response.data.id ? response.data : note))
         );
         alert('Note updated successfully!');
-        navigate(`/notes/${id}`);
       } else {
         response = await axios.post('http://localhost:8000/api/notes/', formData);
         setNotes((prevNotes) => [response.data, ...prevNotes]);
@@ -43,7 +42,7 @@ function NoteForm({ setNotes }) {
       setTitle('');
       setBody('');
       setCoverImage(null);
-      navigate('/notes');
+      navigate('/');
     } catch (error) {
       console.error(error);
     }
