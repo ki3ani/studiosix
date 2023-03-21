@@ -1,30 +1,36 @@
 import { Link } from "react-router-dom";
+import { useState } from "react";
 
 function Header() {
+  const [isDarkMode, setIsDarkMode] = useState(false);
+
+  const handleDarkModeToggle = () => {
+    setIsDarkMode(!isDarkMode);
+    document.body.classList.toggle("bg-gray-800");
+    document.body.classList.toggle("text-white");
+  };
+
   return (
-    <nav className="flex items-center justify-between flex-wrap bg-gray-600 p-6">
-      <div className="flex items-center flex-shrink-0 text-white mr-6">
-        <Link to="/" className="font-bold text-xl">
-          Andika
-        </Link>
+    <header className="flex justify-between items-center px-4 py-6">
+      <Link to="/" className="text-2xl font-bold">
+        Notes
+      </Link>
+      <div className="flex items-center">
+        <button
+          className="p-1 text-gray-700 dark:text-gray-300"
+          onClick={handleDarkModeToggle}
+        >
+          {isDarkMode ? "☀️" : "🌙"}
+        </button>
+        <a
+          href="https://github.com/your-github-link"
+          target="_blank"
+          rel="noreferrer"
+          className="ml-4 text-gray-700 dark:text-gray-300"
+        >
+        </a>
       </div>
-      <div className="w-full block flex-grow lg:flex lg:items-center lg:w-auto">
-        <div className="text-sm lg:flex-grow">
-          <Link
-            to="/"
-            className="block mt-4 lg:inline-block lg:mt-0 text-white hover:text-gray-200 mr-4"
-          >
-           Notes 
-          </Link>
-          <Link
-            to="/create"
-            className="block mt-4 lg:inline-block lg:mt-0 text-white hover:text-gray-200 mr-4"
-          >
-            Create Note
-          </Link>
-        </div>
-      </div>
-    </nav>
+    </header>
   );
 }
 
