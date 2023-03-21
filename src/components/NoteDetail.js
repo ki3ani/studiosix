@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import axios from "axios";
 import NoteForm from "./NoteForm";
+import moment from "moment"; // import moment here
 
 function NoteDetail() {
   const { id } = useParams();
   const [note, setNote] = useState(null);
   const [editing, setEditing] = useState(false);
-  const navigate = useNavigate();
 
   useEffect(() => {
     axios.get(`http://localhost:8000/api/notes/${id}/`).then((response) => {
@@ -23,7 +23,6 @@ function NoteDetail() {
       );
       setNote(response.data);
       setEditing(false);
-      navigate(`/notes/${id}`);
     } catch (error) {
       console.error(error);
     }
@@ -47,7 +46,7 @@ function NoteDetail() {
       <h1 className="text-2xl font-bold text-gray-800 mb-4">{note.title}</h1>
       <p className="text-gray-600 text-base mb-4">{note.body}</p>
       <p className="text-gray-500 text-sm">
-        Last updated: {note.updated}
+        Last updated: {moment(note.updated).format("MMMM Do YYYY, h:mm:ss a")}
       </p>
       <button
         className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mt-4"

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
 
-function NoteForm({ setNotes }) {
+function NoteForm({ setNotes = () => {} }) {
   const navigate = useNavigate();
   const { id } = useParams();
   const [title, setTitle] = useState('');
@@ -33,16 +33,16 @@ function NoteForm({ setNotes }) {
         setNotes((prevNotes) =>
           prevNotes.map((note) => (note.id === response.data.id ? response.data : note))
         );
-        alert('Note updated successfully!');
+        alert(`Note updated successfully!`, navigate(`/notes/${response.data.id}`));
+
       } else {
         response = await axios.post('http://localhost:8000/api/notes/', formData);
         setNotes((prevNotes) => [response.data, ...prevNotes]);
-        alert('Note created successfully!');
+        alert('Note created successfully!', navigate('/'));
       }
       setTitle('');
       setBody('');
       setCoverImage(null);
-      navigate('/');
     } catch (error) {
       console.error(error);
     }
