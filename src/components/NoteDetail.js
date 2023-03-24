@@ -2,24 +2,50 @@ import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import axios from "axios";
 import NoteForm from "./NoteForm";
-import moment from "moment"; // import moment here
+import moment from "moment";
 
 function NoteDetail() {
   const { id } = useParams();
   const [note, setNote] = useState(null);
   const [editing, setEditing] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   useEffect(() => {
-    axios.get(`http://localhost:8000/api/notes/${id}/`).then((response) => {
-      setNote(response.data);
-    });
-  }, [id]);
+    const checkAuth = async () => {
+      try {
+        await axios.get("http://localhost:8000/auth/check-auth/", {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+          },
+        });
+        setIsAuthenticated(true);
+      } catch (error) {
+        console.error(error);
+        setIsAuthenticated(false);
+      }
+    };
+
+    checkAuth();
+  }, []);
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      axios.get(`http://localhost:8000/api/notes/${id}/`).then((response) => {
+        setNote(response.data);
+      });
+    }
+  }, [isAuthenticated, id]);
 
   const handleUpdate = async (formData) => {
     try {
       const response = await axios.patch(
         `http://localhost:8000/api/notes/${id}/`,
-        formData
+        formData,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+          },
+        }
       );
       setNote(response.data);
       setEditing(false);
@@ -28,12 +54,16 @@ function NoteDetail() {
     }
   };
 
-  if (editing) {
-    return <NoteForm note={note} handleSubmit={handleUpdate} />;
+  if (!isAuthenticated) {
+    return <div>Loading...</div>;
   }
 
   if (!note) {
     return <div>Loading...</div>;
+  }
+
+  if (editing) {
+    return <NoteForm note={note} handleSubmit={handleUpdate} />;
   }
 
   return (

@@ -10,13 +10,18 @@ function NoteForm({ setNotes = () => {} }) {
   const [body, setBody] = useState('');
 
   useEffect(() => {
-    if (id) {
-      axios.get(`http://localhost:8000/api/notes/${id}/`).then((response) => {
-        setTitle(response.data.title);
-        setBody(response.data.body);
-      });
+    // Check if user is authenticated
+    if (localStorage.getItem('access_token') === null) {
+      navigate('/login'); // Redirect to login page
+    } else {
+      if (id) {
+        axios.get(`http://localhost:8000/api/notes/${id}/`).then((response) => {
+          setTitle(response.data.title);
+          setBody(response.data.body);
+        });
+      }
     }
-  }, [id]);
+  }, [id, navigate]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -92,10 +97,10 @@ function NoteForm({ setNotes = () => {} }) {
             className="border border-gray-400 rounded w-full px-3 py-2 mt-1 text-gray-900"
           ></textarea>
         </div>
-        <div className="mt-6">
+        <div className="mb-4">
           <button
             type="submit"
-            className="bg-blue-500 text-white font-medium py-2 px-4 rounded hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2"
+            className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
           >
             {id ? 'Update Note' : 'Create Note'}
           </button>
@@ -103,10 +108,8 @@ function NoteForm({ setNotes = () => {} }) {
       </form>
     </div>
   );
-
 }
 
 export default NoteForm;
 
 
-  

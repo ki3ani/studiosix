@@ -9,15 +9,37 @@ function NoteList() {
 
   useEffect(() => {
     async function fetchNotes() {
-      const response = await axios.get('http://localhost:8000/api/notes/');
-      setNotes(response.data);
+      const token = localStorage.getItem('access_token');
+      if (!token) {
+        // Redirect to login page
+        window.location.href = '/login';
+        return;
+      }
+
+      try {
+        const response = await axios.get('http://localhost:8000/api/notes/', {
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        setNotes(response.data);
+      } catch (error) {
+        console.error(error);
+      }
     }
     fetchNotes();
   }, []);
 
   const handleDelete = async (id) => {
+    const token = localStorage.getItem('access_token');
     try {
-      await axios.delete(`http://localhost:8000/api/notes/${id}/`);
+      await axios.delete(`http://localhost:8000/api/notes/${id}/`, {
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+      });
       setNotes(notes.filter((note) => note.id !== id));
     } catch (error) {
       console.error(error);
@@ -62,10 +84,10 @@ function NoteList() {
             </ul>
           ) : (
             <p>No notes found.</p>
+          )}
+        </div>
       )}
     </div>
-  )}
-</div>
   );
 }
 
